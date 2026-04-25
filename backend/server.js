@@ -67,23 +67,30 @@ app.post('/api/generate', async (req, res) => {
     let text = response.response.text();
     console.log("Raw API Output Length:", text.length);
 
-    // Robust cleaning: extraction of the JSON object
-    const firstBrace = text.indexOf('{');
-    const lastBrace = text.lastIndexOf('}');
-    if (firstBrace !== -1 && lastBrace !== -1) {
-      text = text.substring(firstBrace, lastBrace + 1);
-    }
-
     try {
-      const data = JSON.parse(text);
+      // Step 1: Basic cleaning of the text
+      const firstBrace = text.indexOf('{');
+      const lastBrace = text.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1) {
+        text = text.substring(firstBrace, lastBrace + 1);
+      }
+
+      // Step 2: Attempt to fix common JSON issues like unescaped newlines inside strings
+      // AI sometimes leaves raw newlines inside strings which breaks JSON.parse
+      let cleanedText = text
+        .replace(/[\n\r]/g, " ") // Replace all newlines with spaces for now
+        .replace(/\s+/g, " ");   // Collapse multiple spaces
+
+      const data = JSON.parse(cleanedText);
       res.json(data);
     } catch (parseError) {
       console.error("====== JSON PARSE ERROR ======");
-      console.error("Position of Error:", parseError.message);
-      console.error("Cleaned Text Output (first 500 chars):", text.substring(0, 500));
-      console.error("Cleaned Text Output (last 500 chars):", text.substring(text.length - 500));
-      console.error("===============================");
-      res.status(500).json({ error: "AI returned invalid JSON format. Please try again." });
+      console.error("Error Message:", parseError.message);
+      // Fallback: If it still fails, let's try a more aggressive approach or report error
+      res.status(500).json({ 
+        error: "AI returned a formatting error. Please try clicking 'Initialize Flow' again.",
+        details: parseError.message
+      });
     }
 
   } catch (error) {
