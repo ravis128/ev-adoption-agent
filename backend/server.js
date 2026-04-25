@@ -53,8 +53,8 @@ app.post('/api/generate', async (req, res) => {
     
     CRITICAL: Output raw JSON only. Ensure all quotes inside strings are escaped properly if necessary, although the API should handle this with responseMimeType.`;
 
-    // Reverting to the model name that was previously "working" (reached parsing stage)
-    const modelInterface = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // Using a stable Gemini 1.5 Flash model
+    const modelInterface = ai.getGenerativeModel({ model: "gemini-1.5-flash" });
 
     const response = await modelInterface.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
