@@ -38,22 +38,22 @@ app.post('/api/generate', async (req, res) => {
     
     INSTRUCTIONS FOR GENERATION:
     - You must highly contextualize to the Indian market. Use Indian Rupees (₹), kilometers (km), compare with ICE/CNG costs, and mention local context where appropriate.
-    - Example tone/style: "Does the ${model} charge at normal outlets? Yes — and here is the math: Home charging overnight = full charge for ₹220. That is 452 km for less than a tank of CNG. Charging stations within 5 km of your area: [map link]."
     
     Generate the following educational assets to convert curious enquiries into confident test drive bookings. Return ONLY a valid JSON object matching this exact structure:
     {
-      "whatsappDrip": [Array of exactly 7 short conversational strings representing a 7-day daily WhatsApp message series addressing the user concern and city. Do not include 'Day X:' prefix.],
+      "whatsappDrip": ["Day 1 message", "Day 2 message", ..., "Day 7 message"],
       "faq": [
-          { "question": "A specific question", "answer": "Detailed answer using ₹, math, or CNG comparisons if applicable." },
-          { "question": "Another top concern", "answer": "Another detailed answer." }
-          // GENERATE EXACTLY 10 FAQ OBJECTS for the top 10 EV concerns
+          { "question": "Question 1", "answer": "Answer 1" },
+          ...
+          { "question": "Question 10", "answer": "Answer 10" }
       ],
-      "videoScript": "A single comprehensive string containing a 2-3 minute explainer video script. Include [Visuals:] and [Narration:] tags.",
-      "socialPosts": [Array of exactly 7 engaging social media posts addressing EV myths, battery warranty, resale value, and charging infra in ${city}.]
+      "videoScript": "Comprehensive script with [Visuals:] and [Narration:] tags. Keep it under 600 words.",
+      "socialPosts": ["Post 1", "Post 2", ..., "Post 7"]
     }
     
-    DO NOT output markdown formatting like \`\`\`json. Output raw JSON.`;
+    CRITICAL: Output raw JSON only. Ensure all quotes inside strings are escaped properly if necessary, although the API should handle this with responseMimeType.`;
 
+    // Reverting to the model name that was previously "working" (reached parsing stage)
     const modelInterface = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const response = await modelInterface.generateContent({
@@ -65,16 +65,25 @@ app.post('/api/generate', async (req, res) => {
     });
 
     let text = response.response.text();
-    text = text.replace(/```json/gi, '').replace(/```/g, '').trim();
-    
+    console.log("Raw API Output Length:", text.length);
+
+    // Robust cleaning: extraction of the JSON object
+    const firstBrace = text.indexOf('{');
+    const lastBrace = text.lastIndexOf('}');
+    if (firstBrace !== -1 && lastBrace !== -1) {
+      text = text.substring(firstBrace, lastBrace + 1);
+    }
+
     try {
       const data = JSON.parse(text);
       res.json(data);
     } catch (parseError) {
       console.error("====== JSON PARSE ERROR ======");
-      console.error("Raw Text Output:", text);
+      console.error("Position of Error:", parseError.message);
+      console.error("Cleaned Text Output (first 500 chars):", text.substring(0, 500));
+      console.error("Cleaned Text Output (last 500 chars):", text.substring(text.length - 500));
       console.error("===============================");
-      throw parseError;
+      res.status(500).json({ error: "AI returned invalid JSON format. Please try again." });
     }
 
   } catch (error) {

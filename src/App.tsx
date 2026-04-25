@@ -291,22 +291,21 @@ export default function App() {
               <motion.div 
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="grid grid-cols-1 md:grid-cols-2 gap-8"
+                className="grid grid-cols-1 lg:grid-cols-3 gap-8"
               >
                 {/* Branch 1: WhatsApp */}
                 <OutputTile 
                   title="WhatsApp Sequence" 
                   icon={MessageSquare} 
                   accent="teal"
-                  exportTag="WhatsApp Business"
                   onCopy={() => copyToClipboard(output.whatsappDrip.join('\n'), 'wa')}
                   isCopied={copiedId === 'wa'}
                 >
-                  <div className="space-y-4">
+                  <div className="space-y-6">
                     {output.whatsappDrip.map((msg, i) => (
-                      <div key={i} className="group relative p-4 bg-white/5 rounded-2xl border border-white/5 hover:border-teal-500/20 transition-all">
-                        <span className="absolute -top-2 -left-2 w-6 h-6 bg-teal-500 text-black text-[10px] font-black flex items-center justify-center rounded-lg">#D{i+1}</span>
-                        <p className="text-[12px] leading-relaxed text-slate-300 pl-2">{msg}</p>
+                      <div key={i} className="group relative p-6 bg-white/5 rounded-3xl border border-white/5 hover:border-teal-500/20 transition-all hover:bg-white/[0.08]">
+                        <span className="absolute -top-3 -left-3 w-8 h-8 bg-teal-500 text-black text-xs font-black flex items-center justify-center rounded-xl shadow-lg shadow-teal-500/20">#D{i+1}</span>
+                        <p className="text-sm leading-relaxed text-slate-200 pl-2 whitespace-pre-wrap">{msg}</p>
                       </div>
                     ))}
                   </div>
@@ -317,20 +316,19 @@ export default function App() {
                   title="Engagement Plan" 
                   icon={Share2} 
                   accent="indigo"
-                  exportTag="Canva"
                   onCopy={() => copyToClipboard(output.socialPosts.join('\n'), 'social')}
                   isCopied={copiedId === 'social'}
                 >
-                  <div className="space-y-5">
+                  <div className="space-y-6">
                     {output.socialPosts.map((post, i) => (
-                      <div key={i} className="flex gap-4 items-start bg-indigo-500/5 p-4 rounded-2xl border border-indigo-500/10">
-                        <div className="w-2 h-2 rounded-full bg-indigo-500 mt-2 shrink-0 shadow-lg shadow-indigo-500/50" />
-                        <p className="text-[12px] text-slate-300 font-medium">{post}</p>
+                      <div key={i} className="flex gap-5 items-start bg-indigo-500/5 p-6 rounded-3xl border border-indigo-500/10 hover:bg-indigo-500/10 transition-colors">
+                        <div className="w-2.5 h-2.5 rounded-full bg-indigo-500 mt-2 shrink-0 shadow-lg shadow-indigo-500/50" />
+                        <p className="text-sm text-slate-200 font-medium leading-relaxed">{post}</p>
                       </div>
                     ))}
-                    <div className="pt-4 flex gap-2">
-                       <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black text-slate-400">#TWITTER</span>
-                       <span className="px-3 py-1 bg-white/5 rounded-full text-[9px] font-black text-slate-400">#INSTA</span>
+                    <div className="pt-4 flex gap-3">
+                       <span className="px-4 py-1.5 bg-white/5 rounded-full text-[10px] font-black text-slate-400 border border-white/5 uppercase tracking-widest">#TWITTER</span>
+                       <span className="px-4 py-1.5 bg-white/5 rounded-full text-[10px] font-black text-slate-400 border border-white/5 uppercase tracking-widest">#INSTA</span>
                     </div>
                   </div>
                 </OutputTile>
@@ -343,42 +341,16 @@ export default function App() {
                   onCopy={() => copyToClipboard(output.faq.map(f => `${f.question}\n${f.answer}`).join('\n\n'), 'faq')}
                   isCopied={copiedId === 'faq'}
                 >
-                  <div className="space-y-6">
+                  <div className="space-y-8">
                     {output.faq.map((item, i) => (
-                      <div key={i} className="relative pl-6">
-                        <ChevronRight className="absolute left-0 top-0.5 w-4 h-4 text-amber-500" />
-                        <h4 className="text-[13px] font-bold text-white mb-1.5">{item.question}</h4>
-                        <p className="text-[11px] leading-relaxed text-slate-400">{item.answer}</p>
+                      <div key={i} className="relative pl-8 group/item">
+                        <div className="absolute left-0 top-1 w-5 h-5 rounded-lg bg-amber-500/10 flex items-center justify-center group-hover/item:bg-amber-500/20 transition-colors">
+                          <ChevronRight className="w-3.5 h-3.5 text-amber-500" />
+                        </div>
+                        <h4 className="text-sm font-bold text-white mb-2 leading-snug group-hover/item:text-amber-400 transition-colors">{item.question}</h4>
+                        <p className="text-[13px] leading-relaxed text-slate-400 font-medium">{item.answer}</p>
                       </div>
                     ))}
-                  </div>
-                </OutputTile>
-
-                {/* Branch 4: Video */}
-                <OutputTile 
-                  title="Video Production" 
-                  icon={Video} 
-                  accent="rose"
-                  exportTag="Canva"
-                  onCopy={() => copyToClipboard(output.videoScript, 'video')}
-                  isCopied={copiedId === 'video'}
-                >
-                  <div className="h-full flex flex-col justify-between">
-                    <div className="p-5 bg-rose-500/5 border border-rose-500/10 rounded-3xl relative">
-                      <div className="flex items-center gap-2 mb-4">
-                        <Activity className="w-3 h-3 text-rose-400" />
-                        <span className="text-[10px] font-black text-rose-400 uppercase tracking-widest">Optimized for Conversion</span>
-                      </div>
-                      <p className="text-[13px] leading-relaxed text-slate-300 italic">
-                        "{output.videoScript.split('\n\n')[0].replace('Hook: ', '')}"
-                      </p>
-                    </div>
-                    <div className="mt-6 flex items-center justify-between">
-                       <div className="flex -space-x-2">
-                          {[1,2,3].map(i => <div key={i} className="w-6 h-6 rounded-full bg-slate-800 border border-white/10" />)}
-                       </div>
-                       <span className="text-[10px] text-slate-500 font-bold uppercase">+12 Assets Pending</span>
-                    </div>
                   </div>
                 </OutputTile>
               </motion.div>
