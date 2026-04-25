@@ -39,28 +39,24 @@ app.post('/api/generate', async (req, res) => {
     INSTRUCTIONS FOR GENERATION:
     - You must highly contextualize to the Indian market. Use Indian Rupees (₹), kilometers (km), compare with ICE/CNG costs, and mention local context where appropriate.
     
-    Generate the following educational assets to convert curious enquiries into confident test drive bookings. Return ONLY a valid JSON object matching this exact structure:
+    Generate the following educational assets. Be CONCISE (max 100 words per message/item). Return ONLY a valid JSON object:
     {
-      "whatsappDrip": ["Day 1 message", "Day 2 message", ..., "Day 7 message"],
-      "faq": [
-          { "question": "Question 1", "answer": "Answer 1" },
-          ...
-          { "question": "Question 10", "answer": "Answer 10" }
-      ],
-      "videoScript": "Comprehensive script with [Visuals:] and [Narration:] tags. Keep it under 600 words.",
-      "socialPosts": ["Post 1", "Post 2", ..., "Post 7"]
+      "whatsappDrip": ["Day 1-7 messages"],
+      "faq": [{ "question": "Q", "answer": "A" }],
+      "videoScript": "Script under 400 words",
+      "socialPosts": ["Post 1-7"]
     }
     
-    CRITICAL: Output raw JSON only. Ensure all quotes inside strings are escaped properly if necessary, although the API should handle this with responseMimeType.`;
+    CRITICAL: Output raw JSON only. Escape all double quotes inside strings with backslashes (\").`;
 
-    // Reverting to the model name that was previously working
-    const modelInterface = ai.getGenerativeModel({ model: "gemini-2.5-flash" });
+    // Using gemini-1.5-flash-latest (Free Tier)
+    const modelInterface = ai.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
 
     const response = await modelInterface.generateContent({
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
       generationConfig: {
         responseMimeType: "application/json",
-        maxOutputTokens: 8192
+        maxOutputTokens: 4096 // Reducing to encourage conciseness
       }
     });
 
