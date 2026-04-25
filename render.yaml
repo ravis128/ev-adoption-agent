@@ -14,11 +14,12 @@ services:
         sync: false # User must set this in Render UI
 
   # Frontend Vite App (Static Site)
-  - type: static
+  - type: web
     name: ev-agent-frontend
+    runtime: static
     plan: free
     buildCommand: npm install && npm run build
-    publishPath: dist
+    staticPublishPath: ./dist
     envVars:
       - key: VITE_API_URL
         value: https://ev-agent-backend.onrender.com # Change this if backend URL differs
