@@ -1,0 +1,25 @@
+services:
+  # Backend Express Server
+  - type: web
+    name: ev-agent-backend
+    env: node
+    rootDir: backend
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: PORT
+        value: 5000
+      - key: GEMINI_API_KEY
+        sync: false # User must set this in Render UI
+
+  # Frontend Vite App (Static Site)
+  - type: web
+    name: ev-agent-frontend
+    env: static
+    plan: free
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://ev-agent-backend.onrender.com # Change this if backend URL differs
