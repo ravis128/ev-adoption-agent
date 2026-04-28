@@ -241,35 +241,6 @@ export default function App() {
             </form>
           </motion.div>
 
-          {/* New Log Terminal */}
-          <motion.div 
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="bg-black/60 border border-white/5 rounded-3xl p-6 font-mono text-xs overflow-hidden h-[300px] flex flex-col"
-          >
-            <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
-              <div className="flex gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-full bg-red-500/50" />
-                <div className="w-2.5 h-2.5 rounded-full bg-amber-500/50" />
-                <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/50" />
-              </div>
-              <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest flex items-center gap-1.5">
-                <Terminal className="w-3 h-3" /> System Logs
-              </span>
-            </div>
-            <div className="flex-1 overflow-y-auto space-y-2 scrollbar-hide pr-2">
-              {logs.length === 0 ? (
-                <div className="text-slate-800 italic">No logs in buffer... waiting for flow initialization.</div>
-              ) : (
-                logs.map((log, i) => (
-                  <div key={i} className={`flex gap-3 ${log.includes('[ERROR]') ? 'text-red-400' : log.includes('[SUCCESS]') ? 'text-emerald-400' : 'text-slate-400'}`}>
-                    <span className="shrink-0 text-slate-700">[{logs.length - i}]</span>
-                    <p className="leading-relaxed">{log}</p>
-                  </div>
-                ))
-              )}
-            </div>
-          </motion.div>
 
 
         </section>
