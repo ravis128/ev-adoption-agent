@@ -49,40 +49,47 @@ app.post('/api/generate', async (req, res) => {
     
     CRITICAL: Output raw JSON only. Escape all double quotes inside strings with backslashes (\").`;
 
-    // Using gemini-1.5-flash-latest (Free Tier)
-    const modelInterface = ai.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+    const modelInterface = ai.getGenerativeModel({ model: "gemini-flash-latest" });
 
-    const response = await modelInterface.generateContent({
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        maxOutputTokens: 4096 // Reducing to encourage conciseness
+    // Helper for generating content with retry logic
+    const generateWithRetry = async (attempt = 1) => {
+      try {
+        return await modelInterface.generateContent({
+          contents: [{ role: 'user', parts: [{ text: prompt }] }],
+          generationConfig: {
+            responseMimeType: "application/json",
+            maxOutputTokens: 4096
+          }
+        });
+      } catch (err) {
+        if (err.status === 429 && attempt < 2) {
+          console.log(`⚠️ Rate limit hit. Retrying in 2 seconds... (Attempt ${attempt}/2)`);
+          await new Promise(r => setTimeout(r, 2000));
+          return generateWithRetry(attempt + 1);
+        }
+        throw err;
       }
-    });
+    };
 
+    const response = await generateWithRetry();
     let text = response.response.text();
     console.log("Raw API Output Length:", text.length);
 
     try {
-      // Step 1: Basic cleaning of the text
       const firstBrace = text.indexOf('{');
       const lastBrace = text.lastIndexOf('}');
       if (firstBrace !== -1 && lastBrace !== -1) {
         text = text.substring(firstBrace, lastBrace + 1);
       }
 
-      // Step 2: Attempt to fix common JSON issues like unescaped newlines inside strings
-      // AI sometimes leaves raw newlines inside strings which breaks JSON.parse
       let cleanedText = text
-        .replace(/[\n\r]/g, " ") // Replace all newlines with spaces for now
-        .replace(/\s+/g, " ");   // Collapse multiple spaces
+        .replace(/[\n\r]/g, " ")
+        .replace(/\s+/g, " ");
 
       const data = JSON.parse(cleanedText);
       res.json(data);
     } catch (parseError) {
       console.error("====== JSON PARSE ERROR ======");
-      console.error("Error Message:", parseError.message);
-      // Fallback: If it still fails, let's try a more aggressive approach or report error
       res.status(500).json({ 
         error: "AI returned a formatting error. Please try clicking 'Initialize Flow' again.",
         details: parseError.message
@@ -91,6 +98,12 @@ app.post('/api/generate', async (req, res) => {
 
   } catch (error) {
     console.error("Error calling Gemini API:", error);
+    if (error.status === 429) {
+      return res.status(429).json({ 
+        error: "API Rate Limit Reached", 
+        details: "The shared API key has reached its limit. Please wait 60 seconds or use a private GEMINI_API_KEY in the .env file." 
+      });
+    }
     res.status(500).json({ error: "Failed to generate assets due to an AI generation error." });
   }
 });
